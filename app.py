@@ -230,7 +230,7 @@ st.markdown(
     <div class="brand-header">
         {logo_html}
         <h1 class="brand-title">PDFtoXL</h1>
-        <p class="brand-subtitle">Flawless Coordinate-Locked Statement Extraction</p>
+        <p class="brand-subtitle">PDF to Excel assistant (Prototype Version)</p>
     </div>
     """,
     unsafe_allow_html=True
