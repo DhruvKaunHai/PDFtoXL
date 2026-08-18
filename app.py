@@ -210,7 +210,7 @@ st.markdown(
     <div class="brand-header">
         {logo_html}
         <h1 class="brand-title">PDFtoXL</h1>
-        <p class="brand-subtitle">PDF to Excel assistant (Prototype Version)</p>
+        <p class="brand-subtitle">PDF to Excel assistance (Prototype Version)</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -220,16 +220,30 @@ st.markdown(
 # 3. CORE PROCESSING ENGINE
 # ==========================================
 def get_strict_vertical_boundaries(page):
+    """Captures black, light grey, thin stroke, rect and curve vertical boundaries."""
     v_lines = []
-    for line in page.lines:
-        if abs(line['x0'] - line['x1']) <= 2.5 and abs(line['bottom'] - line['top']) >= 15:
-            v_lines.append((line['x0'] + line['x1']) / 2.0)
-            
+    
+    # 1. Capture all drawn lines & edges (including grey/colored edges)
+    all_edges = getattr(page, 'edges', []) or page.lines
+    for edge in all_edges:
+        if abs(edge['x0'] - edge['x1']) <= 3.0 and abs(edge['bottom'] - edge['top']) >= 8:
+            v_lines.append((edge['x0'] + edge['x1']) / 2.0)
+
+    # 2. Capture vertical strokes rendered as rectangles
     for rect in page.rects:
-        if rect.get('height', 0) >= 15:
-            v_lines.append(rect['x0'])
-            v_lines.append(rect['x1'])
-            
+        if rect.get('height', 0) >= 8:
+            if rect.get('width', 0) <= 5:
+                v_lines.append((rect['x0'] + rect['x1']) / 2.0)
+            else:
+                v_lines.append(rect['x0'])
+                v_lines.append(rect['x1'])
+
+    # 3. Capture vector curve vertical strokes
+    for curve in getattr(page, 'curves', []):
+        if abs(curve['x0'] - curve['x1']) <= 3.0 and abs(curve['bottom'] - curve['top']) >= 8:
+            v_lines.append((curve['x0'] + curve['x1']) / 2.0)
+
+    # Deduplicate lines within 4px tolerance
     v_lines = sorted(v_lines)
     unique_lines = []
     for x in v_lines:
@@ -251,6 +265,7 @@ def extract_strict_x_grid(page):
     if not words:
         return None
 
+    # Exact Y-axis line grouping preserved
     words = sorted(words, key=lambda w: (w['top'], w['x0']))
     lines = []
     curr_line = [words[0]]
