@@ -32,7 +32,7 @@ bg_data_uri = get_base64_image("background")
 logo_data_uri = get_base64_image("logo")
 
 # ==========================================
-# 2. CENTERED HIGH-TRANSPARENCY UI
+# 2. MOBILE-FRIENDLY RESPONSIVE UI
 # ==========================================
 st.markdown(
     f"""
@@ -49,42 +49,40 @@ st.markdown(
         color: #FFFFFF;
     }}
 
-    /* Hide standard Streamlit header and footer */
     header, footer {{visibility: hidden;}}
     #MainMenu {{visibility: hidden;}}
 
-    /* Centered Transparent Glass Card (Low blur so background is visible) */
+    /* Responsive Glass Card */
     .block-container {{
         max-width: 740px !important;
-        margin: 3.5vh auto 2rem auto !important;
-        padding: 3rem 2.5rem 2.5rem 2.5rem !important;
-        background: rgba(15, 23, 42, 0.28) !important;
+        margin: 2vh auto 2rem auto !important;
+        padding: 2.5rem 1.5rem !important;
+        background: rgba(15, 23, 42, 0.32) !important;
         backdrop-filter: blur(4px) !important;
         -webkit-backdrop-filter: blur(4px) !important;
         border: 1px solid rgba(255, 255, 255, 0.22) !important;
-        border-radius: 28px !important;
+        border-radius: 24px !important;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
     }}
 
-    /* Header & Branding */
+    /* Responsive Brand Header */
     .brand-header {{
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
     }}
     .brand-logo {{
-        width: 85px;
+        width: 75px;
         height: auto;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
     }}
     
-    /* 200% Large Brand Title */
     .brand-title {{
-        font-size: 5.5rem !important;
+        font-size: clamp(3rem, 12vw, 5.5rem) !important;
         font-weight: 900 !important;
         line-height: 1;
         letter-spacing: -2px;
@@ -95,28 +93,23 @@ st.markdown(
         filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
     }}
     .brand-subtitle {{
-        font-size: 0.95rem;
+        font-size: clamp(0.8rem, 3vw, 0.95rem);
         color: #E2E8F0;
         margin-top: 8px;
         letter-spacing: 0.5px;
-        font-weight: 400;
     }}
 
-    /* Large Drag & Drop Box */
+    /* Responsive File Uploader */
     [data-testid="stFileUploader"] {{
-        padding: 0;
+        width: 100%;
+        margin-top: 10px;
     }}
     [data-testid="stFileUploader"] section {{
-        background: rgba(255, 255, 255, 0.04) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
         border: 2px dashed rgba(56, 189, 248, 0.55) !important;
-        border-radius: 20px !important;
-        padding: 3rem 1.5rem !important;
-        transition: all 0.3s ease;
-    }}
-    [data-testid="stFileUploader"] section:hover {{
-        background: rgba(56, 189, 248, 0.1) !important;
-        border-color: #38BDF8 !important;
-        transform: translateY(-2px);
+        border-radius: 18px !important;
+        padding: 2rem 1rem !important;
+        cursor: pointer;
     }}
 
     /* Action Buttons */
@@ -124,16 +117,12 @@ st.markdown(
         background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 100%) !important;
         color: #FFFFFF !important;
         font-weight: 600 !important;
-        font-size: 1.08rem !important;
+        font-size: 1.05rem !important;
         border: none !important;
         border-radius: 14px !important;
         padding: 0.85rem 1.5rem !important;
         box-shadow: 0 10px 20px rgba(14, 165, 233, 0.35) !important;
-        transition: all 0.25s ease !important;
-    }}
-    .stButton > button:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 14px 26px rgba(14, 165, 233, 0.5) !important;
+        margin-top: 10px;
     }}
 
     /* Download Box Button */
@@ -141,24 +130,18 @@ st.markdown(
         background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
         color: #FFFFFF !important;
         font-weight: 600 !important;
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
         border: none !important;
         border-radius: 14px !important;
-        padding: 1rem 1.5rem !important;
+        padding: 0.9rem 1.5rem !important;
         box-shadow: 0 12px 24px rgba(16, 185, 129, 0.35) !important;
-        transition: all 0.25s ease !important;
-    }}
-    [data-testid="stDownloadButton"] > button:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 16px 28px rgba(16, 185, 129, 0.5) !important;
     }}
 
-    /* Custom Footnote */
     .brand-footnote {{
         text-align: center;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         color: #94A3B8;
-        margin-top: 2.2rem;
+        margin-top: 2rem;
         letter-spacing: 1.2px;
         text-transform: uppercase;
         font-weight: 600;
@@ -168,55 +151,52 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Fullscreen Drag & Drop & Paste Support (Ctrl+V)
+# Desktop-only JS (bypassed on mobile to prevent touch tap hijack)
 components.html(
     """
     <script>
-    const doc = window.parent.document;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) {
+        const doc = window.parent.document;
+        ['dragenter', 'dragover'].forEach(eventName => {
+            doc.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        doc.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const uploader = doc.querySelector('section[data-testid="stFileUploadDropzone"]');
-            if (uploader) uploader.style.borderColor = '#38BDF8';
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        doc.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const uploader = doc.querySelector('section[data-testid="stFileUploadDropzone"]');
-            if (uploader) uploader.style.borderColor = 'rgba(56, 189, 248, 0.55)';
-            
-            if (eventName === 'drop' && e.dataTransfer.files.length > 0) {
-                const input = doc.querySelector('input[type="file"]');
-                if (input) {
-                    input.files = e.dataTransfer.files;
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            }
-        }, false);
-    });
-
-    doc.addEventListener('paste', (e) => {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        for (let item of items) {
-            if (item.kind === 'file') {
-                const file = item.getAsFile();
-                if (file && file.type === 'application/pdf') {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
+        ['dragleave', 'drop'].forEach(eventName => {
+            doc.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (eventName === 'drop' && e.dataTransfer.files.length > 0) {
                     const input = doc.querySelector('input[type="file"]');
                     if (input) {
-                        input.files = dataTransfer.files;
+                        input.files = e.dataTransfer.files;
                         input.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
+            }, false);
+        });
+
+        doc.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    if (file && file.type === 'application/pdf') {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        const input = doc.querySelector('input[type="file"]');
+                        if (input) {
+                            input.files = dataTransfer.files;
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
             }
-        }
-    });
+        });
+    }
     </script>
     """,
     height=0,
@@ -237,7 +217,7 @@ st.markdown(
 )
 
 # ==========================================
-# 3. CORE PROCESSING ENGINE (UNTOUCHED)
+# 3. CORE PROCESSING ENGINE
 # ==========================================
 def get_strict_vertical_boundaries(page):
     v_lines = []
@@ -341,9 +321,9 @@ def extract_strict_x_grid(page):
 # 4. ONE-CLICK USER INTERACTION
 # ==========================================
 uploaded_file = st.file_uploader(
-    "Drop PDF here or paste (Ctrl+V)",
+    "Choose a PDF file",
     type=["pdf"],
-    label_visibility="collapsed"
+    label_visibility="visible"
 )
 
 if uploaded_file is not None:
@@ -403,7 +383,6 @@ if uploaded_file is not None:
                     excel_data = output.getvalue()
                     st.success(f"Extracted {sum(len(df) for df in pages_data.values())} rows across {len(pages_data)} page(s)!")
 
-                    # Download Action
                     st.download_button(
                         label="📥 Download .xlsx File",
                         data=excel_data,
@@ -412,7 +391,6 @@ if uploaded_file is not None:
                         use_container_width=True
                     )
 
-                    # Preview tabs
                     st.write("---")
                     preview_tabs = st.tabs(list(pages_data.keys()))
                     for tab, (sheet_name, df) in zip(preview_tabs, pages_data.items()):
@@ -422,7 +400,6 @@ if uploaded_file is not None:
             except Exception as e:
                 st.error(f"Error: {e}")
 
-# Footnote
 st.markdown(
     '<div class="brand-footnote">Built by DHRUV, with hate.</div>',
     unsafe_allow_html=True
